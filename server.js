@@ -37,6 +37,6 @@ cron.schedule("0 */6 * * *", () => {
 
 // Start server
 app.listen(PORT, () => {
-  scrapeEvents(); // Initial scrape on server start
+  //scrapeEvents(); // Initial scrape on server start
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
