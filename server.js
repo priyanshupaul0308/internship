@@ -1,42 +1,39 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const fs = require("fs");
-const scrapeEvents = require("./scraper");
-const cron = require("node-cron");
 
 const app = express();
-const PORT = process.env.PORT || 3000; // ✅ Use env PORT for deployment
+const PORT = process.env.PORT || 3000;
 
-// Serve static files (like CSS) from "public" folder
+// Serve static files like style.css
 app.use(express.static("public"));
 
-// Set view engine and views directory
+// Set EJS as view engine
 app.set("view engine", "ejs");
 app.set("views", "./views");
 
-// Middleware
+// Parse URL-encoded bodies
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Routes
+// Route: Home - loads static events from events.json
 app.get("/", (req, res) => {
-  const events = JSON.parse(fs.readFileSync("events.json", "utf8"));
-  res.render("index", { events });
+  try {
+    const events = JSON.parse(fs.readFileSync("events.json", "utf8"));
+    res.render("index", { events });
+  } catch (error) {
+    console.error("Error reading events.json:", error.message);
+    res.render("index", { events: [] });
+  }
 });
 
+// Route: Handle ticket request
 app.post("/get-tickets", (req, res) => {
   const { email, link } = req.body;
   console.log(`User Email: ${email}`);
   res.redirect(link);
 });
 
-// Schedule scraping every 6 hours
-cron.schedule("0 */6 * * *", () => {
-  console.log("⏰ Scheduled scraping started");
-  scrapeEvents();
-});
-
-// Start server
+// Server Start (no scraping)
 app.listen(PORT, () => {
-  //scrapeEvents(); // Initial scrape on server start
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
